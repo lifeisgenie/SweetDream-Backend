@@ -1,5 +1,8 @@
 package com.example.Sweet_Dream.dto.response;
 
+import lombok.Data;
+
+@Data
 public class ResponseSignUpDTO {
     private String userId;
     private String username;

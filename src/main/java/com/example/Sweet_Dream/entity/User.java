@@ -3,6 +3,8 @@ package com.example.Sweet_Dream.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.List;
+
 @Entity
 @Table(name = "users")
 @Data
@@ -12,8 +14,11 @@ public class User {
     private String userId;  // 사용자 ID를 기본키로 사용
 
     @ManyToOne
-    @JoinColumn(name = "role_id", referencedColumnName = "id")
+    @JoinColumn(name = "role_id")
     private Role role;  // 외래키로 Role 엔티티 참조
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<RefreshToken> refreshTokens;
 
     @Column(nullable = false)
     private String username;  // 사용자 이름

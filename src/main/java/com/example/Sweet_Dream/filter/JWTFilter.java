@@ -22,55 +22,45 @@ import java.io.IOException;
 @Component
 public class JWTFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private RoleRepository roleRepository;
-
     private final JWTUtil jwtUtil;
+    private final RoleRepository roleRepository;
 
-    public JWTFilter(JWTUtil jwtUtil) {
-
+    @Autowired
+    public JWTFilter(JWTUtil jwtUtil, RoleRepository roleRepository) {
         this.jwtUtil = jwtUtil;
+        this.roleRepository = roleRepository;
     }
 
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        String authorization= request.getHeader("Authorization");
+        String authorization = request.getHeader("Authorization");
 
         if (authorization == null || !authorization.startsWith("Bearer ")) {
-
-            System.out.println("token null");
             filterChain.doFilter(request, response);
-
             return;
         }
 
-        System.out.println("authorization now");
         String token = authorization.split(" ")[1];
 
         if (jwtUtil.isExpired(token)) {
-
-            System.out.println("token expired");
-            filterChain.doFilter(request, response);
-
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Token expired");
             return;
         }
 
         String username = jwtUtil.getUsername(token);
         String role = jwtUtil.getRole(token);
 
-        // role 값을 RoleName enum으로 변환
         RoleName roleName = RoleName.valueOf(role.toUpperCase());
-
-        // Role 엔티티를 데이터베이스에서 조회
         Role roleEntity = roleRepository.findByRoleName(roleName);
 
         if (roleEntity != null) {
             User userEntity = new User();
             userEntity.setUsername(username);
             userEntity.setPassword("temppassword"); // 임시 비밀번호
-            userEntity.setRole(roleEntity); // Role 객체 설정
+            userEntity.setRole(roleEntity);
 
             CustomUserDetails customUserDetails = new CustomUserDetails(userEntity);
 

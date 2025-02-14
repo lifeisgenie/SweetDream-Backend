@@ -5,46 +5,56 @@ import com.example.Sweet_Dream.dto.response.ResponseSignUpDTO;
 import com.example.Sweet_Dream.entity.Role;
 import com.example.Sweet_Dream.entity.RoleName;
 import com.example.Sweet_Dream.entity.User;
+import com.example.Sweet_Dream.repository.RoleRepository;
 import com.example.Sweet_Dream.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.roleRepository = roleRepository;
     }
 
     public ResponseSignUpDTO signUp(RequestSignUpDTO requestSignUpDTO) {
-        // 이메일 중복 체크
+        // ID와 이메일 중복 확인
+        if (userRepository.existsByUserId(requestSignUpDTO.getUserId())) {
+            throw new RuntimeException("User ID already exists");
+        }
         if (userRepository.existsByEmail(requestSignUpDTO.getEmail())) {
             throw new RuntimeException("Email already exists");
         }
 
-        // 비밀번호 암호화
-        String encryptedPassword = passwordEncoder.encode(requestSignUpDTO.getPassword());
+        // Role이 없는 경우 기본적으로 USER 역할을 부여
+        Role role = roleRepository.findByRoleName(RoleName.USER);
+        if (role == null) {
+            role = new Role();
+            role.setRoleName(RoleName.USER);
+            role.setCreatedAt(LocalDateTime.now());
+            roleRepository.save(role);  // 새 Role을 DB에 저장
+        }
 
         // User 객체 생성
         User user = new User();
         user.setUserId(requestSignUpDTO.getUserId());
         user.setUsername(requestSignUpDTO.getUsername());
         user.setEmail(requestSignUpDTO.getEmail());
-        user.setPassword(encryptedPassword);
+        user.setPassword(passwordEncoder.encode(requestSignUpDTO.getPassword()));  // 비밀번호 암호화
+        user.setRole(role);  // Role 설정
 
-        // 역할 설정 (기본 역할 예: USER)
-        Role role = new Role();
-        role.setRoleName(RoleName.USER);
-        user.setRole(role);
-
-        // DB에 저장
+        // User 저장
         userRepository.save(user);
 
-        // 응답 DTO 생성
+        // Response DTO 반환
         return new ResponseSignUpDTO(user.getUserId(), user.getUsername(), user.getEmail());
     }
 }
