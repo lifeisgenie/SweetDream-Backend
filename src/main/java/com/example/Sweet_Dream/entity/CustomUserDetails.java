@@ -5,10 +5,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Data
 public class CustomUserDetails implements UserDetails {
@@ -20,10 +18,9 @@ public class CustomUserDetails implements UserDetails {
         this.user = user;
     }
 
-    // role 값을 반환
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().getRoleName().name()));
+        return List.of(new SimpleGrantedAuthority(user.getRole().getRoleName().name()));
     }
 
     // 비밀번호 반환.
@@ -59,4 +56,10 @@ public class CustomUserDetails implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
+    // 역할을 직접 가져옴
+    public RoleName getRoleName() {
+        return user.getRole().getRoleName();
+    }
+
 }

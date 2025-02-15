@@ -16,9 +16,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -63,20 +61,10 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException, ServletException {
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
 
-        // authentication.getAuthorities()에서 role 정보 추출
-        String role = authentication.getAuthorities()
-                .stream()
-                .findFirst() // 첫 번째 권한을 가져옴
-                .map(GrantedAuthority::getAuthority) // 권한을 String으로 가져옴
-                .orElseThrow(() -> new RuntimeException("Role not found")); // 권한이 없으면 예외를 던짐
+        RoleName roleEnum = customUserDetails.getRoleName();
+        String roleNameString = roleEnum.name();
 
-        // "ROLE_"을 제외한 실제 role 이름만 추출
-        String roleNameString = role.replace("ROLE_", "").toUpperCase(); // 대소문자 구분을 해결하기 위해 toUpperCase() 사용
-
-        // RoleName enum으로 변환
-        RoleName roleEnum = RoleName.valueOf(roleNameString);  // 이제 RoleName에서 ROLE_ 없이 값만 사용
-
-        final long ACCESS_TOKEN_EXPIRATION = 60 * 60 * 10L; // 10시간
+        final long ACCESS_TOKEN_EXPIRATION = 5L * 1000; // 10시간
         final long REFRESH_TOKEN_EXPIRATION = 60 * 60 * 24 * 7L; // 7일
 
         // JWT 생성
@@ -89,14 +77,13 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         // JWT를 Authorization 헤더에 추가
         response.addHeader("Authorization", "Bearer " + accessToken);
-        response.addHeader("Refresh-Token", refreshToken);
 
         // 리프레시 토큰을 쿠키에 추가 (30일 유효)
         CookieUtils.addCookie(response, "refresh_token", refreshToken, 60 * 60 * 24 * 30); // 30일 유효
 
         // 응답을 JSON 형태로 반환
         response.setContentType("application/json");
-        response.getWriter().write("{\"accessToken\": \"" + accessToken + "\", \"refreshToken\": \"" + refreshToken + "\"}");
+        response.getWriter().write("{\"accessToken\": \"" + accessToken + "\", \"role\": \"" + roleNameString + "\"}");
     }
 
     // 로그인 실패 시 오류 메시지 반환

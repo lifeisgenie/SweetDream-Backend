@@ -22,32 +22,24 @@ public class AuthController {
     private final AuthService authService;
     private final JWTUtil jwtUtil;
 
-    // 생성자 주입을 통해 JWTUtil을 주입받습니다.
     public AuthController(AuthService authService, JWTUtil jwtUtil) {
         this.authService = authService;
         this.jwtUtil = jwtUtil;
     }
 
-    // 리프레시 토큰으로 새로운 액세스 토큰을 생성
     @PostMapping("/refresh")
     public ResponseEntity<String> refreshAccessToken(HttpServletRequest request) {
-        // 쿠키에서 리프레시 토큰을 가져옴
         String refreshToken = CookieUtils.getCookieValue(request, "refresh_token");
 
         if (refreshToken == null) {
-            System.out.println("리프레시 토큰이 null입니다.");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("리프레시 토큰을 찾을 수 없습니다.");
         }
 
         try {
-            // 리프레시 토큰에서 userId를 추출
             String userId = jwtUtil.getUserIdFromRefreshToken(refreshToken);
-
-            // 리프레시 토큰을 이용해 새로운 액세스 토큰을 생성
             String newAccessToken = authService.refreshAccessToken(userId, refreshToken);
-
-            return ResponseEntity.ok(newAccessToken);  // 새로운 액세스 토큰을 반환
+            return ResponseEntity.ok(newAccessToken);
         } catch (ExpiredJwtException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("리프레시 토큰이 만료되었습니다.");
@@ -63,21 +55,17 @@ public class AuthController {
         }
     }
 
-    // 로그아웃
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = CookieUtils.getCookieValue(request, "refresh_token");
 
-        // 디버깅: 리프레시 토큰 값 출력
-        System.out.println("로그아웃 요청: refresh_token = " + refreshToken);
-
-        // 리프레시 토큰이 없는 경우 처리
+        // 리프레시 토큰이 없으면 403 반환
         if (refreshToken == null) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("리프레시 토큰이 존재하지 않습니다.");
         }
 
         try {
-            authService.logout(refreshToken);  // 리프레시 토큰이 유효한지 확인하고 로그아웃 처리
+            authService.logout(refreshToken);  // 로그아웃 처리 (리프레시 토큰 삭제)
         } catch (InvalidTokenException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("유효하지 않은 리프레시 토큰입니다.");
         }
