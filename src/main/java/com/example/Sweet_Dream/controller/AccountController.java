@@ -10,11 +10,11 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/accounts")
-public class UserController {
+public class AccountController {
 
     private final UserService userService;
 
-    public UserController(UserService userService) {
+    public AccountController(UserService userService) {
         this.userService = userService;
     }
 
@@ -25,4 +25,5 @@ public class UserController {
                 .contentType(MediaType.APPLICATION_JSON)  // 응답 타입을 명시적으로 설정
                 .body(response);
     }
+
 }
