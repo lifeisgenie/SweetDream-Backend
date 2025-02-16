@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, String> {
+public interface AccountRepository extends JpaRepository<User, String> {
     // 이메일 중복 체크를 위한 메서드 추가
     boolean existsByEmail(String email);
 

@@ -2,7 +2,7 @@ package com.example.Sweet_Dream.service;
 
 import com.example.Sweet_Dream.entity.CustomUserDetails;
 import com.example.Sweet_Dream.entity.User;
-import com.example.Sweet_Dream.repository.UserRepository;
+import com.example.Sweet_Dream.repository.AccountRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -11,11 +11,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserRepository userRepository;
+    private final AccountRepository accountRepository;
 
-    public CustomUserDetailsService(UserRepository userRepository) {
+    public CustomUserDetailsService(AccountRepository accountRepository) {
 
-        this.userRepository = userRepository;
+        this.accountRepository = accountRepository;
     }
 
     // 구현 방법은 DB에서 특정 User를 조회해서 리턴을 해야 되므로 DB 연결을 진행
@@ -23,7 +23,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
 
-        User userData = userRepository.findByUserId(userId);
+        User userData = accountRepository.findByUserId(userId);
 
         if (userData != null) {
             return new CustomUserDetails(userData);

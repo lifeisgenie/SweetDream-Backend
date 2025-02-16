@@ -6,7 +6,7 @@ import com.example.Sweet_Dream.entity.RoleName;
 import com.example.Sweet_Dream.entity.User;
 import com.example.Sweet_Dream.jwt.JWTUtil;
 import com.example.Sweet_Dream.repository.RoleRepository;
-import com.example.Sweet_Dream.repository.UserRepository;
+import com.example.Sweet_Dream.repository.AccountRepository;
 import com.example.Sweet_Dream.util.CookieUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -26,14 +26,14 @@ public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
     private final RoleRepository roleRepository;
-    private final UserRepository userRepository;
+    private final AccountRepository accountRepository;
 
     // 생성자: JWTUtil, RoleRepository, UserRepository 주입
     @Autowired
-    public JWTFilter(JWTUtil jwtUtil, RoleRepository roleRepository, UserRepository userRepository) {
+    public JWTFilter(JWTUtil jwtUtil, RoleRepository roleRepository, AccountRepository accountRepository) {
         this.jwtUtil = jwtUtil;
         this.roleRepository = roleRepository;
-        this.userRepository = userRepository;
+        this.accountRepository = accountRepository;
     }
 
     @Override
@@ -99,7 +99,7 @@ public class JWTFilter extends OncePerRequestFilter {
             // 리프레시 토큰을 사용하는 경우
             if (refreshToken != null) {
                 String userId = jwtUtil.getUserIdFromRefreshToken(refreshToken);
-                User user = userRepository.findByUserId(userId);
+                User user = accountRepository.findByUserId(userId);
 
                 if (user != null) {
                     // 사용자 정보 설정

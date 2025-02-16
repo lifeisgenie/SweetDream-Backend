@@ -6,7 +6,7 @@ import com.example.Sweet_Dream.entity.Role;
 import com.example.Sweet_Dream.entity.RoleName;
 import com.example.Sweet_Dream.entity.User;
 import com.example.Sweet_Dream.repository.RoleRepository;
-import com.example.Sweet_Dream.repository.UserRepository;
+import com.example.Sweet_Dream.repository.AccountRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -15,22 +15,22 @@ import java.time.LocalDateTime;
 @Service
 public class UserService {
 
-    private final UserRepository userRepository;
+    private final AccountRepository accountRepository;
     private final RoleRepository roleRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, RoleRepository roleRepository) {
-        this.userRepository = userRepository;
+    public UserService(AccountRepository accountRepository, BCryptPasswordEncoder passwordEncoder, RoleRepository roleRepository) {
+        this.accountRepository = accountRepository;
         this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
     }
 
     public ResponseSignUpDTO signUp(RequestSignUpDTO requestSignUpDTO) {
         // ID와 이메일 중복 확인
-        if (userRepository.existsByUserId(requestSignUpDTO.getUserId())) {
+        if (accountRepository.existsByUserId(requestSignUpDTO.getUserId())) {
             throw new RuntimeException("User ID already exists");
         }
-        if (userRepository.existsByEmail(requestSignUpDTO.getEmail())) {
+        if (accountRepository.existsByEmail(requestSignUpDTO.getEmail())) {
             throw new RuntimeException("Email already exists");
         }
 
@@ -52,7 +52,7 @@ public class UserService {
         user.setRole(role);  // Role 설정
 
         // User 저장
-        userRepository.save(user);
+        accountRepository.save(user);
 
         // Response DTO 반환
         return new ResponseSignUpDTO(user.getUserId(), user.getUsername(), user.getEmail());
