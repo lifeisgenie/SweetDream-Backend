@@ -5,6 +5,7 @@ import com.example.Sweet_Dream.entity.RefreshToken;
 import com.example.Sweet_Dream.entity.RoleName;
 import com.example.Sweet_Dream.jwt.JWTUtil;
 import com.example.Sweet_Dream.repository.RefreshTokenRepository;
+import com.example.Sweet_Dream.service.AuthService;
 import com.example.Sweet_Dream.util.CookieUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -21,20 +22,22 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Map;
 
-public class LoginFilter extends UsernamePasswordAuthenticationFilter {
+public class SignInFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final AuthService authService;
 
-    // 생성자 주입을 통해 의존성 해결
     @Autowired
-    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil, RefreshTokenRepository refreshTokenRepository) {
+    public SignInFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil,
+                        RefreshTokenRepository refreshTokenRepository, AuthService authService) {
         super(authenticationManager);
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.refreshTokenRepository = refreshTokenRepository;
-        setFilterProcessesUrl("/accounts/login"); // 로그인 요청 URL
+        this.authService = authService;
+        setFilterProcessesUrl("/accounts/signin"); // 로그인 요청 URL
     }
 
     // 로그인 인증을 위한 attempt 메소드
@@ -61,25 +64,34 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException, ServletException {
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
 
+        String refreshToken = CookieUtils.getCookieValue(request, "refresh_token");
+
+        // 리프레시 토큰이 존재하는 경우, 블랙리스트 체크
+        if (refreshToken != null && authService.isTokenBlacklisted(refreshToken)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Blacklisted refresh token");
+            return; // 블랙리스트에 있는 경우 로그인 시도 차단
+        }
+
         RoleName roleEnum = customUserDetails.getRoleName();
         String roleNameString = roleEnum.name();
 
-        final long ACCESS_TOKEN_EXPIRATION = 5L * 1000; // 10시간
+        final long ACCESS_TOKEN_EXPIRATION = 100L * 1000; // 10시간
         final long REFRESH_TOKEN_EXPIRATION = 60 * 60 * 24 * 7L; // 7일
 
         // JWT 생성
         String accessToken = jwtUtil.createAccessToken(customUserDetails.getUsername(), roleEnum, ACCESS_TOKEN_EXPIRATION);
-        String refreshToken = jwtUtil.createRefreshToken(customUserDetails.getUsername(), REFRESH_TOKEN_EXPIRATION);
+        String newRefreshToken = jwtUtil.createRefreshToken(customUserDetails.getUsername(), REFRESH_TOKEN_EXPIRATION);
 
         // 리프레시 토큰을 DB에 저장
         LocalDateTime expiresAt = LocalDateTime.now().plusSeconds(REFRESH_TOKEN_EXPIRATION);
-        refreshTokenRepository.save(new RefreshToken(refreshToken, customUserDetails.getUser(), expiresAt));
+        refreshTokenRepository.save(new RefreshToken(newRefreshToken, customUserDetails.getUser(), expiresAt));
 
         // JWT를 Authorization 헤더에 추가
         response.addHeader("Authorization", "Bearer " + accessToken);
 
-        // 리프레시 토큰을 쿠키에 추가 (30일 유효)
-        CookieUtils.addCookie(response, "refresh_token", refreshToken, 60 * 60 * 24 * 30); // 30일 유효
+        // 리프레시 토큰을 쿠키에 추가
+        CookieUtils.addCookie(response, "refresh_token", newRefreshToken, 60 * 60 * 24 * 30); // 30일 유효
 
         // 응답을 JSON 형태로 반환
         response.setContentType("application/json");

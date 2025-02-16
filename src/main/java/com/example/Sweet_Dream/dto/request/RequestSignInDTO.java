@@ -1,10 +1,9 @@
 package com.example.Sweet_Dream.dto.request;
 
-import com.example.Sweet_Dream.entity.RoleName;
 import lombok.Data;
 
 @Data
-public class RequestLoginDTO {
+public class RequestSignInDTO {
     private String userId;
     private String password;
 }

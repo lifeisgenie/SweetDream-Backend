@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -56,7 +57,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response, @RequestParam(value = "reason", defaultValue = "User logged out") String reason) {
         String refreshToken = CookieUtils.getCookieValue(request, "refresh_token");
 
         // 리프레시 토큰이 없으면 403 반환
@@ -65,7 +66,7 @@ public class AuthController {
         }
 
         try {
-            authService.logout(refreshToken);  // 로그아웃 처리 (리프레시 토큰 삭제)
+            authService.logout(refreshToken, reason);  // 로그아웃 처리 (리프레시 토큰 삭제)
         } catch (InvalidTokenException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("유효하지 않은 리프레시 토큰입니다.");
         }

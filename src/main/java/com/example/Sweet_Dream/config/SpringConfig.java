@@ -1,9 +1,10 @@
 package com.example.Sweet_Dream.config;
 
 import com.example.Sweet_Dream.filter.JWTFilter;
-import com.example.Sweet_Dream.filter.LoginFilter;
+import com.example.Sweet_Dream.filter.SignInFilter;
 import com.example.Sweet_Dream.jwt.JWTUtil;
 import com.example.Sweet_Dream.repository.RefreshTokenRepository;
+import com.example.Sweet_Dream.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,12 +35,14 @@ public class SpringConfig {
     private final RefreshTokenRepository refreshTokenRepository;
     private final JWTUtil jwtUtil;
     private final JWTFilter jwtFilter;
+    private final AuthService authService;
 
     @Autowired
-    public SpringConfig(RefreshTokenRepository refreshTokenRepository, JWTUtil jwtUtil, JWTFilter jwtFilter) {
+    public SpringConfig(RefreshTokenRepository refreshTokenRepository, JWTUtil jwtUtil, JWTFilter jwtFilter, AuthService authService) {
         this.refreshTokenRepository = refreshTokenRepository;
         this.jwtUtil = jwtUtil;
         this.jwtFilter = jwtFilter;
+        this.authService = authService;
     }
 
     @Bean
@@ -53,8 +56,8 @@ public class SpringConfig {
     }
 
     @Bean
-    public LoginFilter loginFilter(AuthenticationManager authenticationManager) {
-        return new LoginFilter(authenticationManager, jwtUtil, refreshTokenRepository);
+    public SignInFilter loginFilter(AuthenticationManager authenticationManager) {
+        return new SignInFilter(authenticationManager, jwtUtil, refreshTokenRepository, authService);
     }
 
     @Bean
@@ -64,7 +67,7 @@ public class SpringConfig {
                 .formLogin(form -> form.disable())
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/accounts/login", "/", "/accounts/signup", "/h2-console/**").permitAll()
+                        .requestMatchers("/accounts/signin", "/", "/accounts/signup", "/h2-console/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(loginFilter(authenticationManager), UsernamePasswordAuthenticationFilter.class)
