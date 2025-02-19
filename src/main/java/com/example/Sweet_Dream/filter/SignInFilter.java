@@ -105,3 +105,4 @@ public class SignInFilter extends UsernamePasswordAuthenticationFilter {
         response.getWriter().write("Authentication failed: " + failed.getMessage());
     }
 }
+
