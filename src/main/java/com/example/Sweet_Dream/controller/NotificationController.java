@@ -49,7 +49,7 @@ public class NotificationController {
 
     // 특정 사용자의 알림 목록 조회
     @GetMapping("/{userId}")
-    public List<ResponseNotificationDTO> getUserNotifications(@PathVariable String userId) {
+    public List<ResponseNotificationDTO> getUserNotifications(@PathVariable("userId") String userId) {
         try {
             return notificationService.getUserNotifications(userId);
         } catch (Exception e) {

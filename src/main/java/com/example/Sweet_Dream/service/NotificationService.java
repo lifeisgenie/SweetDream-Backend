@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.format.DateTimeFormatter;
-import java.util.Formatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,7 +46,7 @@ public class NotificationService {
     // 특정 사용자의 모든 알림 조회
     @Transactional
     public List<ResponseNotificationDTO> getUserNotifications(String userId) {
-        return notificationRepository.findNotificationByUserId(userId)
+        return notificationRepository.findByUser_UserId(userId)
                 .stream()
                 .map(this::toResponseDTO)
                 .collect(Collectors.toList());
@@ -65,7 +64,7 @@ public class NotificationService {
     // 알림 객체 생성
     private Notification createNotification(User user, String title, String content) {
         Notification notification = new Notification();
-        notification.setUser_id(user);
+        notification.setUser(user);
         notification.setTitle(title);
         notification.setContent(content);
         return notification;
@@ -75,7 +74,7 @@ public class NotificationService {
     private ResponseNotificationDTO toResponseDTO(Notification notification) {
         return new ResponseNotificationDTO(
                 notification.getNotificationId(),
-                notification.getUser_id().getUserId(),
+                notification.getUser().getUserId(),
                 notification.getTitle(),
                 notification.getContent(),
                 notification.getCreatedAt().toString(),

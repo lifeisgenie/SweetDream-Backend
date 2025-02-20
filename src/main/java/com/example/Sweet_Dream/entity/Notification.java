@@ -15,8 +15,8 @@ public class Notification {
     private Long notificationId; // 고유 ID
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user_id; // 알림 받는 사용자
+    @JoinColumn(name = "userId", nullable = false)
+    private User user; // 알림 받는 사용자
 
     @Column(name = "title", nullable = false)
     private String title; // 알림 제목

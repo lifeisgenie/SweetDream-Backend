@@ -67,7 +67,7 @@ public class SpringConfig {
                 .formLogin(form -> form.disable())
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/accounts/signin", "/", "/accounts/signup", "/h2-console/**").permitAll()
+                        .requestMatchers("/accounts/signin", "/", "/accounts/signup", "/h2-console/**", "/ws/**", "/topic/**", "/app/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(loginFilter(authenticationManager), UsernamePasswordAuthenticationFilter.class)
