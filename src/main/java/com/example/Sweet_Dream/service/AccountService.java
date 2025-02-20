@@ -8,6 +8,7 @@ import com.example.Sweet_Dream.entity.RoleName;
 import com.example.Sweet_Dream.entity.User;
 import com.example.Sweet_Dream.repository.RoleRepository;
 import com.example.Sweet_Dream.repository.AccountRepository;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -62,5 +63,9 @@ public class AccountService {
 
     public String getUserIdByEmail(String email) {
         return accountRepository.findByEmail(email).map(User::getUserId).orElse(null);
+    }
+
+    public User getUserByUserID(String userId){
+        return accountRepository.findByUserId(userId);
     }
 }

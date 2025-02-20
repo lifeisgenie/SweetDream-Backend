@@ -28,4 +28,7 @@ public class User {
 
     @Column(nullable = false)
     private String password;  // 비밀번호
+
+    @Column
+    private String image;
 }
