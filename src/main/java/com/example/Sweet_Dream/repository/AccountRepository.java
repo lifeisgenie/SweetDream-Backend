@@ -17,4 +17,5 @@ public interface AccountRepository extends JpaRepository<User, String> {
     boolean existsByUserId(String userId);  // userId로 존재 여부 확인
 
     Optional<User> findByEmail(String email);
+
 }

@@ -8,12 +8,14 @@ import com.example.Sweet_Dream.jwt.JWTUtil;
 import com.example.Sweet_Dream.repository.RefreshTokenBlacklistRepository;
 import com.example.Sweet_Dream.repository.RefreshTokenRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 @Service
 @Transactional
 public class AuthService {
@@ -21,13 +23,6 @@ public class AuthService {
     private final JWTUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
     private final RefreshTokenBlacklistRepository blacklistRepository;
-
-    @Autowired
-    public AuthService(JWTUtil jwtUtil, RefreshTokenRepository refreshTokenRepository, RefreshTokenBlacklistRepository blacklistRepository) {
-        this.jwtUtil = jwtUtil;
-        this.refreshTokenRepository = refreshTokenRepository;
-        this.blacklistRepository = blacklistRepository;
-    }
 
     // 리프레시 토큰이 블랙리스트에 있는지 확인하는 메서드
     public boolean isTokenBlacklisted(String refreshToken) {

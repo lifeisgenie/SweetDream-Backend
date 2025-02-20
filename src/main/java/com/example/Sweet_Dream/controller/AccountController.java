@@ -9,11 +9,13 @@ import com.example.Sweet_Dream.dto.response.ResponseSignUpDTO;
 import com.example.Sweet_Dream.service.AccountService;
 import com.example.Sweet_Dream.service.EmailService;
 import com.example.Sweet_Dream.service.OtpService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/accounts")
 public class AccountController {
@@ -21,12 +23,6 @@ public class AccountController {
     private final AccountService accountService;
     private final OtpService otpService;
     private final EmailService emailService;
-
-    public AccountController(AccountService accountService, OtpService otpService, EmailService emailService) {
-        this.accountService = accountService;
-        this.otpService = otpService;
-        this.emailService = emailService;
-    }
 
     @PostMapping("/signup")
     public ResponseEntity<ResponseSignUpDTO> signUp(@RequestBody RequestSignUpDTO requestSignUpDTO) {

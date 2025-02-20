@@ -8,6 +8,7 @@ import com.example.Sweet_Dream.entity.RoleName;
 import com.example.Sweet_Dream.entity.User;
 import com.example.Sweet_Dream.repository.RoleRepository;
 import com.example.Sweet_Dream.repository.AccountRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -15,18 +16,13 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 @Service
 public class AccountService {
 
     private final AccountRepository accountRepository;
     private final RoleRepository roleRepository;
     private final BCryptPasswordEncoder passwordEncoder;
-
-    public AccountService(AccountRepository accountRepository, BCryptPasswordEncoder passwordEncoder, RoleRepository roleRepository) {
-        this.accountRepository = accountRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.roleRepository = roleRepository;
-    }
 
     public ResponseSignUpDTO signUp(RequestSignUpDTO requestSignUpDTO) {
         // ID와 이메일 중복 확인

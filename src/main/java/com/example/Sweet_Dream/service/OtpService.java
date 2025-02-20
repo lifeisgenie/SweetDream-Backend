@@ -13,6 +13,7 @@ import java.util.Random;
 @Service
 @RequiredArgsConstructor
 public class OtpService {
+
     private final EmailVerificationRepository verificationRepository;
     private final Random random = new Random();
     private static final int OTP_LENGTH = 6;
