@@ -2,7 +2,6 @@ package com.example.Sweet_Dream.service;
 
 import com.example.Sweet_Dream.dto.request.RequestSignUpDTO;
 import com.example.Sweet_Dream.dto.response.ResponseSignUpDTO;
-import com.example.Sweet_Dream.dto.request.FindIdRequestDTO;
 import com.example.Sweet_Dream.dto.response.FindIdResponseDTO;
 import com.example.Sweet_Dream.entity.Role;
 import com.example.Sweet_Dream.entity.RoleName;
@@ -61,23 +60,7 @@ public class AccountService {
         return new ResponseSignUpDTO(user.getUserId(), user.getUsername(), user.getEmail());
     }
 
-
-    public FindIdResponseDTO findId(FindIdRequestDTO request) {
-        Optional<User> user = accountRepository.findByUsernameAndEmail(request.getUsername(), request.getEmail());
-        // 이름과 이메일로 사용자를 검색
-
-        if (user.isPresent()) { // 사용자 존재
-            return FindIdResponseDTO.builder()
-                    .resultCode("201000") // 성공 코드
-                    .resultMessage("인증 성공")
-                    .userId(user.get().getUserId()) // 조회한 사용자 ID값 포함
-                    .build();
-        } else { // 사용자 없을 경우
-            return FindIdResponseDTO.builder()
-                    .resultCode("404000")
-                    .resultMessage("인증 정보 없음")
-                    .userId(null) // id를 널로 반환
-                    .build();
-        }
+    public String getUserIdByEmail(String email) {
+        return accountRepository.findByEmail(email).map(User::getUserId).orElse(null);
     }
 }
