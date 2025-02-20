@@ -50,9 +50,8 @@ public class UserController {
     public ResponseEntity<ResponseUpdateMyPageDTO> updateMyPage(Authentication authentication, @RequestBody RequestUpdateMyPageDTO request) {
         String userId = authentication.getName();
         User user = accountService.getUserByUserID(userId);
-
-        User user1 = userService.updateUser(user, request);
-        return ResponseEntity.ok(new ResponseUpdateMyPageDTO(user1));
+        User modifiedUser = userService.updateUser(user, request);
+        return ResponseEntity.ok(new ResponseUpdateMyPageDTO(modifiedUser));
 
     }
 
